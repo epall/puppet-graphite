@@ -8,3 +8,4 @@ description 'This module installs and makes basic configs for graphite, with car
 project_page 'https://github.com/echocat/puppet-graphite'
 
 dependency   'puppetlabs/stdlib', '>= 3.2.0'
+dependency   'jfryman/nginx', '>= 0.0.9'
