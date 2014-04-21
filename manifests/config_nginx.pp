@@ -7,6 +7,9 @@
 #
 # None.
 #
+
+include nginx
+
 class graphite::config_nginx inherits graphite::params {
   Exec { path => '/bin:/usr/bin:/usr/sbin' }
 
@@ -14,50 +17,8 @@ class graphite::config_nginx inherits graphite::params {
     fail("nginx-based graphite is not supported on ${::operatingsystem} (only supported on Debian)")
   }
 
-  # we need a nginx with gunicorn for python support
-
-  package {
-    'nginx':
-      ensure => installed,
-      before => Exec['Chown graphite for web user'],
-      notify => Exec['Chown graphite for web user'];
-  }
-
-  file { '/etc/nginx/sites-enabled/default':
-    ensure  => absent,
-    require => Package['nginx'],
-    notify  => Service['nginx'];
-  }
-
-  service {
-    'nginx':
-      ensure     => running,
-      enable     => true,
-      hasrestart => true,
-      hasstatus  => true,
-      require    => Exec['Chown graphite for web user'];
-  }
-
-  # Ensure that some directories exist first. This is normally handled by the
-  # package, but if we uninstall and reinstall nginx and delete /etc/nginx.
-  # By default the package manager won't replace the directory.
-
-  file {
-    '/etc/nginx':
-      ensure  => directory,
-      mode    => '0755',
-      require => Package['nginx'];
-
-    '/etc/nginx/sites-available':
-      ensure  => directory,
-      mode    => '0755',
-      require => File['/etc/nginx'];
-
-    '/etc/nginx/sites-enabled':
-      ensure  => directory,
-      mode    => '0755',
-      require => File['/etc/nginx'];
-  }
+  Package['nginx'] -> Exec['Chown graphite for web user']
+  Package['nginx'] ~> Exec['Chown graphite for web user']
 
   # Deploy configfiles
 
